@@ -49,6 +49,17 @@
     window.addEventListener("resize", function () { if (window.innerWidth >= 1024) setMenu(false); });
   }
 
+  /* ---------- Services dropdown ---------- */
+  document.querySelectorAll(".has-menu").forEach(function (item) {
+    var btn = item.querySelector(".nav-menu-btn");
+    function set(open) { item.classList.toggle("is-open", open); btn.setAttribute("aria-expanded", String(open)); }
+    btn.addEventListener("click", function (e) { e.stopPropagation(); set(!item.classList.contains("is-open")); });
+    item.addEventListener("mouseenter", function () { btn.setAttribute("aria-expanded", "true"); });
+    item.addEventListener("mouseleave", function () { set(false); });
+    document.addEventListener("click", function (e) { if (!item.contains(e.target)) set(false); });
+    item.addEventListener("keydown", function (e) { if (e.key === "Escape") { set(false); btn.focus(); } });
+  });
+
   /* ---------- Reveal on scroll ---------- */
   var revealEls = document.querySelectorAll(".reveal, .reveal-img, .steps");
   if ("IntersectionObserver" in window && !reduceMotion) {

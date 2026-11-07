@@ -333,3 +333,24 @@ p { margin: 0; }
 @media (max-width: 959px) { .hero .dots { display: none; } }
 [data-presets] { max-width: 880px; }
 .contact strong, .site-footer li { overflow-wrap: anywhere; }
+
+/* ---------- Services dropdown ---------- */
+.nav ul { align-items: center; }
+.has-menu { position: relative; }
+.nav-menu-btn { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; padding: 6px 0; font-size: 0.97rem; color: var(--ink); cursor: pointer; border-bottom: 2px solid transparent; }
+.nav-menu-btn:hover, .nav-menu-btn.is-current { border-bottom-color: var(--amber); }
+.nav-menu-btn .chev { width: 15px; height: 15px; transition: transform .2s; }
+.has-menu.is-open .chev, .has-menu:hover .chev { transform: rotate(180deg); }
+.submenu { position: absolute; top: calc(100% + 10px); left: -18px; min-width: 260px; list-style: none; margin: 0; padding: 8px; background: #fff; border-radius: 12px; box-shadow: 0 14px 40px rgba(0,0,0,.12); border: 1px solid var(--line); opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .18s, transform .18s, visibility .18s; display: block !important; }
+.submenu::before { content: ""; position: absolute; left: 0; right: 0; top: -12px; height: 12px; }
+.has-menu:hover .submenu, .has-menu:focus-within .submenu, .has-menu.is-open .submenu { opacity: 1; visibility: visible; transform: none; }
+.submenu a { display: grid; gap: 2px; padding: 10px 12px; border-radius: 8px; border-bottom: 0 !important; }
+.submenu a:hover, .submenu a[aria-current="page"] { background: var(--sand); }
+.submenu strong { font-weight: 600; font-size: .95rem; }
+.submenu span { font-size: .82rem; color: var(--soft); }
+
+/* ---------- Inner page header ---------- */
+.page-head { position: relative; overflow: hidden; padding-block: clamp(40px, 6vw, 72px) clamp(32px, 4vw, 48px); }
+.page-head .dots { right: 6%; left: auto; top: 30px; }
+.page-head .lede { max-width: 40em; }
+@media (max-width: 959px) { .page-head .dots { display: none; } }
