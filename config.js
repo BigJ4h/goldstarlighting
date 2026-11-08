@@ -2,13 +2,12 @@
  * Site configuration — edit before launch.
  *
  * formEndpoint: where quote requests are POSTed (multipart/form-data).
- *   Works with Formspree (https://formspree.io/f/XXXX), Basin, Getform,
- *   or your own endpoint. Leave empty until a real endpoint exists:
+ *   Currently FormSubmit (JSON). Formspree/Basin/Getform URLs also work. Leave empty until a real endpoint exists:
  *   the form will then tell visitors it is not connected and offer
  *   phone / email instead. It never pretends a request was sent.
  */
 window.SITE_CONFIG = {
-  formEndpoint: "",
+  formEndpoint: "https://formsubmit.co/ajax/Goldenstarpropertycare@gmail.com",
   businessEmail: "Goldenstarpropertycare@gmail.com",
   phoneDisplay: "(848) 403-7111",
   phoneHref: "+18484037111"

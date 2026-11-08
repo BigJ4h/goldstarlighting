@@ -61,7 +61,7 @@
       </ul>
     </div>
     <div class="card reveal">
-      <form data-quote-form novalidate enctype="multipart/form-data" method="post" aria-describedby="form-note">
+      <form data-quote-form novalidate method="post" aria-describedby="form-note">
         <div class="form-grid">
           <div class="field"><label for="f-name">Name</label><input id="f-name" name="name" type="text" autocomplete="name" data-required aria-describedby="e-name"><span class="error" id="e-name" aria-live="polite"></span></div>
           <div class="field"><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" data-required aria-describedby="e-phone"><span class="error" id="e-phone" aria-live="polite"></span></div>
@@ -69,7 +69,7 @@
           <div class="field"><label for="f-loc">Property address or ZIP</label><input id="f-loc" name="location" type="text" autocomplete="street-address" data-required aria-describedby="e-loc"><span class="error" id="e-loc" aria-live="polite"></span></div>
           <fieldset class="field full service-options"><legend>What are you interested in?</legend><label class="opt-card"><input type="radio" name="service" value="permanent"><span>Permanent lighting</span></label><label class="opt-card"><input type="radio" name="service" value="christmas"><span>Christmas lighting</span></label><label class="opt-card"><input type="radio" name="service" value="both"><span>Both / not sure</span></label></fieldset>
           <div class="field full"><label for="f-details">Project details <span class="opt">(optional)</span></label><textarea id="f-details" name="details" placeholder="Which rooflines or trees, timing, anything else we should know"></textarea></div>
-          <div class="field full"><label for="f-photos">Photos of your home <span class="opt">(optional, up to 5)</span></label><input id="f-photos" name="photos" type="file" accept="image/*" multiple aria-describedby="e-photos"><span class="error" id="e-photos" aria-live="polite"></span></div>
+          <p class="full soft" style="font-size:.9rem">Have photos of your home? Text them to <a class="text-link" href="sms:+18484037111">(848) 403-7111</a> after you send this.</p>
           <div class="hp" aria-hidden="true"><label for="f-hp">Leave empty</label><input id="f-hp" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
         </div>
         <div class="form-foot"><p id="form-note">We only use your details to reply to your request.</p><button class="btn" type="submit">Request Your Free Quote</button></div>

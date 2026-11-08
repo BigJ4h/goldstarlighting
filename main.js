@@ -183,7 +183,7 @@
         if (err) err.textContent = msg;
         if (msg && ok) { el.focus(); ok = false; }
       });
-      var files = form.querySelector('input[type="file"]');
+      var files = null;
       if (files && files.files) {
         var total = 0;
         for (var i = 0; i < files.files.length; i++) total += files.files[i].size;
@@ -225,12 +225,21 @@
       submit.disabled = true;
       var label = submit.innerHTML;
       submit.textContent = "Sending…";
-      fetch(cfg.formEndpoint, { method: "POST", body: fd, headers: { Accept: "application/json" } })
-        .then(function (res) {
-          if (!res.ok) throw new Error("HTTP " + res.status);
+      var payload = {};
+      fd.forEach(function (v, k) { if (typeof v === "string") payload[k] = v; });
+      payload._subject = "New quote request: " + (payload.name || "website") + (payload.service ? " (" + payload.service + ")" : "");
+      payload._replyto = payload.email || "";
+      payload._template = "table";
+      payload._captcha = "false";
+      payload._honey = "";
+      fetch(cfg.formEndpoint, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "application/json", Accept: "application/json" } })
+        .then(function (res) { return res.json().catch(function () { return {}; }).then(function (data) { return { ok: res.ok, data: data }; }); })
+        .then(function (r) {
+          var good = r.ok && (r.data.success === true || r.data.success === "true" || r.data.ok === true || (r.data.success === undefined && r.data.ok === undefined));
+          if (!good) throw new Error((r.data && r.data.message) || "send failed");
           form.reset();
           form.querySelectorAll("[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
-          showStatus("ok", "<strong>Thank you — your request was received.</strong> We'll be in touch to schedule your consultation.");
+          showStatus("ok", "<strong>Thank you! Your request was received.</strong> We'll be in touch to schedule your consultation.");
         })
         .catch(function () {
           showStatus("err", "<strong>Something went wrong and your request was not sent.</strong> Please try again, or " + contactLine().charAt(0).toLowerCase() + contactLine().slice(1));
