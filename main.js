@@ -183,13 +183,13 @@
         if (err) err.textContent = msg;
         if (msg && ok) { el.focus(); ok = false; }
       });
-      var files = null;
-      if (files && files.files) {
-        var total = 0;
-        for (var i = 0; i < files.files.length; i++) total += files.files[i].size;
+      var files = form.querySelector('input[type="file"]');
+      if (files && !files.closest("[hidden]") && files.files) {
+        var bad = false;
+        for (var i = 0; i < files.files.length; i++) if (files.files[i].size > 25 * 1024 * 1024) bad = true;
         var ferr = files.closest(".field").querySelector(".error");
-        if (files.files.length > 5 || total > 10 * 1024 * 1024) {
-          ferr.textContent = "Please attach up to 5 photos, 10 MB total.";
+        if (files.files.length > 5 || bad) {
+          ferr.textContent = "Please attach up to 5 photos (25 MB max each).";
           if (ok) files.focus();
           ok = false;
         } else if (ferr) ferr.textContent = "";
@@ -208,23 +208,27 @@
       return 'Call <a href="tel:' + cfg.phoneHref + '">' + cfg.phoneDisplay + '</a> or email <a href="mailto:' + cfg.businessEmail + '">' + cfg.businessEmail + "</a>.";
     }
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      if (form.querySelector(".hp input").value) return; // bot
-      if (!validate()) return;
-      var fd = new FormData(form);
-      fd.delete("company_website");
+    var worker = (cfg.workerUrl || "").replace(/\/$/, "");
+    form.querySelectorAll("[data-worker-only]").forEach(function (el) { el.hidden = !worker; });
+    form.querySelectorAll("[data-no-worker]").forEach(function (el) { el.hidden = !!worker; });
+    var preview = document.getElementById("ai-preview");
 
-      if (!cfg.formEndpoint) {
-        showStatus("warn",
-          "<strong>Your request has not been sent.</strong> Online quote requests aren't connected yet. " +
-          '<a href="' + mailtoFallback(fd) + '">Send these details by email</a> instead, or ' + contactLine().charAt(0).toLowerCase() + contactLine().slice(1));
-        return;
-      }
+    // Shrink photos in the browser before upload (faster on phones, smaller for the AI).
+    function shrink(file, max) {
+      return new Promise(function (resolve) {
+        if (!file || !/^image\//.test(file.type) || typeof createImageBitmap !== "function") return resolve(file);
+        createImageBitmap(file).then(function (bmp) {
+          var scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+          var c = document.createElement("canvas");
+          c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+          c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+          c.toBlob(function (blob) { resolve(blob ? new File([blob], "photo.jpg", { type: "image/jpeg" }) : file); }, "image/jpeg", 0.85);
+        }).catch(function () { resolve(file); });
+      });
+    }
 
-      submit.disabled = true;
-      var label = submit.innerHTML;
-      submit.textContent = "Sending…";
+    function sendEmail(fd) {
+      if (!cfg.formEndpoint) return Promise.reject(new Error("no email endpoint"));
       var payload = {};
       fd.forEach(function (v, k) { if (typeof v === "string") payload[k] = v; });
       payload._subject = "New quote request: " + (payload.name || "website") + (payload.service ? " (" + payload.service + ")" : "");
@@ -232,14 +236,77 @@
       payload._template = "table";
       payload._captcha = "false";
       payload._honey = "";
-      fetch(cfg.formEndpoint, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "application/json", Accept: "application/json" } })
-        .then(function (res) { return res.json().catch(function () { return {}; }).then(function (data) { return { ok: res.ok, data: data }; }); })
+      return fetch(cfg.formEndpoint, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "application/json", Accept: "application/json" } })
+        .then(function (res) { return res.json().catch(function () { return {}; }).then(function (d) {
+          var good = res.ok && (d.success === true || d.success === "true" || d.ok === true || (d.success === undefined && d.ok === undefined));
+          if (!good) throw new Error(d.message || "email failed");
+        }); });
+    }
+
+    function sendAlert(fd, photos) {
+      if (!worker) return Promise.reject(new Error("no worker"));
+      var body = new FormData();
+      fd.forEach(function (v, k) { if (typeof v === "string") body.append(k, v); });
+      photos.forEach(function (p) { body.append("photos", p, "photo.jpg"); });
+      return fetch(worker + "/quote", { method: "POST", body: body }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (d) { if (!res.ok || !d.ok) throw new Error("alert failed"); });
+      });
+    }
+
+    function runPreview(photo, service, name) {
+      var load = preview.querySelector(".preview__loading"), result = preview.querySelector(".preview__result"), err = preview.querySelector(".preview__error");
+      preview.hidden = false; load.hidden = false; result.hidden = true; err.hidden = true;
+      var body = new FormData();
+      body.append("photo", photo, "house.jpg");
+      body.append("service", service === "christmas" ? "christmas" : "permanent");
+      body.append("name", name || "");
+      fetch(worker + "/preview", { method: "POST", body: body })
+        .then(function (res) { return res.json().then(function (d) { if (!res.ok || !d.ok || !d.image) throw new Error(d.error || "preview failed"); return d; }); })
+        .then(function (d) {
+          result.querySelector("img").src = "data:image/png;base64," + d.image;
+          load.hidden = true; result.hidden = false;
+          if (!reduceMotion) preview.scrollIntoView({ behavior: "smooth", block: "center" });
+        })
+        .catch(function () { load.hidden = true; err.hidden = false; });
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (form.querySelector(".hp input").value) return; // bot
+      if (!validate()) return;
+      var fd = new FormData(form);
+      fd.delete("company_website");
+      fd.delete("photos");
+      fd.delete("wants_preview");
+
+      if (!cfg.formEndpoint && !worker) {
+        showStatus("warn",
+          "<strong>Your request has not been sent.</strong> Online quote requests aren't connected yet. " +
+          '<a href="' + mailtoFallback(fd) + '">Send these details by email</a> instead, or ' + contactLine().charAt(0).toLowerCase() + contactLine().slice(1));
+        return;
+      }
+
+      var fileInput = form.querySelector('input[type="file"]');
+      var raw = worker && fileInput && fileInput.files ? Array.prototype.slice.call(fileInput.files, 0, 5) : [];
+      var wantsPreview = worker && raw.length && form.querySelector("#f-preview") && form.querySelector("#f-preview").checked;
+      var service = fd.get("service") || "permanent";
+      var name = fd.get("name");
+
+      submit.disabled = true;
+      var label = submit.innerHTML;
+      submit.textContent = raw.length ? "Uploading…" : "Sending…";
+      Promise.all(raw.map(function (f) { return shrink(f, 1536); }))
+        .then(function (photos) {
+          var jobs = [sendEmail(fd), sendAlert(fd, photos)];
+          return Promise.all(jobs.map(function (p) { return p.then(function () { return true; }, function () { return false; }); }))
+            .then(function (results) { return { delivered: results.indexOf(true) > -1, photos: photos }; });
+        })
         .then(function (r) {
-          var good = r.ok && (r.data.success === true || r.data.success === "true" || r.data.ok === true || (r.data.success === undefined && r.data.ok === undefined));
-          if (!good) throw new Error((r.data && r.data.message) || "send failed");
+          if (!r.delivered) throw new Error("not delivered");
           form.reset();
           form.querySelectorAll("[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
-          showStatus("ok", "<strong>Thank you! Your request was received.</strong> We'll be in touch to schedule your consultation.");
+          showStatus("ok", "<strong>Thank you! Your request was received.</strong> We'll be in touch to schedule your consultation." + (wantsPreview ? " Your lighting preview is being created below." : ""));
+          if (wantsPreview) runPreview(r.photos[0], service, name);
         })
         .catch(function () {
           showStatus("err", "<strong>Something went wrong and your request was not sent.</strong> Please try again, or " + contactLine().charAt(0).toLowerCase() + contactLine().slice(1));

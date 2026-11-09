@@ -8,6 +8,9 @@
  */
 window.SITE_CONFIG = {
   formEndpoint: "https://formsubmit.co/ajax/Goldenstarpropertycare@gmail.com",
+  // Cloudflare Worker that sends quote alerts and creates AI previews
+  // (e.g. "https://goldstar-quotes.<your-subdomain>.workers.dev"). Empty = feature off.
+  workerUrl: "https://goldstar-quotes.jahcereawesome.workers.dev",
   businessEmail: "Goldenstarpropertycare@gmail.com",
   phoneDisplay: "(848) 403-7111",
   phoneHref: "+18484037111"
