@@ -20,11 +20,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=202611082103">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "HomeAndConstructionBusiness", "@id": "https://goldstarlighting.org/#business", "name": "Golden Star Property Care", "url": "https://goldstarlighting.org/", "telephone": "+18484037111", "email": "Goldenstarpropertycare@gmail.com", "image": "https://goldstarlighting.org/og-image.png", "logo": "https://goldstarlighting.org/favicon.svg", "description": "Permanent exterior lighting and professional Christmas light installation.", "makesOffer": [{"@type": "Offer", "itemOffered": {"@id": "https://goldstarlighting.org/permanent-lighting.html#service"}}, {"@type": "Offer", "itemOffered": {"@id": "https://goldstarlighting.org/christmas-lighting.html#service"}}], "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "11:00", "closes": "20:30"}, {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday", "Sunday"], "opens": "10:00", "closes": "20:00"}], "areaServed": "Monmouth County, NJ"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://goldstarlighting.org/"}, {"@type": "ListItem", "position": 2, "name": "Contact", "item": "https://goldstarlighting.org/contact.html"}]}</script>
-<script src="config.js" defer></script>
-<script src="main.js" defer></script>
+<script src="config.js?v=202611082103" defer></script>
+<script src="main.js?v=202611082103" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -72,13 +72,29 @@
           <div class="field full"><label for="f-coverage">Where do you want lights?</label><select id="f-coverage" name="coverage"><option value="whole">The whole roofline</option><option value="front">Just the front of the house</option></select></div>
           <fieldset class="field full service-options"><legend>What are you interested in?</legend><label class="opt-card"><input type="radio" name="service" value="permanent"><span>Permanent lighting</span></label><label class="opt-card"><input type="radio" name="service" value="christmas"><span>Christmas lighting</span></label><label class="opt-card"><input type="radio" name="service" value="both"><span>Both / not sure</span></label></fieldset>
           <div class="field full"><label for="f-details">Project details <span class="opt">(optional)</span></label><textarea id="f-details" name="details" placeholder="Which rooflines or trees, timing, anything else we should know"></textarea></div>
-          <div class="field full" data-worker-only hidden><label for="f-photos">Photos of your home <span class="opt">(optional, up to 5)</span></label><input id="f-photos" name="photos" type="file" accept="image/*" multiple aria-describedby="h-photos e-photos"><span class="soft" id="h-photos" style="font-size:.85rem">For the best preview, make the first photo the front of your home, taken from the street in daylight.</span><span class="error" id="e-photos" aria-live="polite"></span></div>
-          <label class="check full" data-worker-only hidden><input type="checkbox" id="f-preview" name="wants_preview" value="yes" checked><span>Show me an AI preview of my home with lights. Your first photo is sent to OpenAI to create it.</span></label>
+          <div class="ai-box full" data-worker-only hidden>
+            <p class="ai-box__title"><span class="ai-box__badge">Free</span> See your home lit up before you buy</p>
+            <p class="soft ai-box__text">Add a daytime photo of the front of your house. Right after you send this form, we’ll show you an AI preview of your home with warm lights along the roofline.</p>
+            <div class="field"><label for="f-photos">Photos of your home <span class="opt">(optional, up to 5)</span></label><input id="f-photos" name="photos" type="file" accept="image/*" multiple aria-describedby="h-photos e-photos"><span class="soft" id="h-photos" style="font-size:.85rem">Best results: the first photo shows the whole front of the house, taken from the street in daylight.</span><span class="error" id="e-photos" aria-live="polite"></span></div>
+            <label class="check"><input type="checkbox" id="f-preview" name="wants_preview" value="yes" checked><span>Show me my AI preview. My first photo is sent to OpenAI to create it.</span></label>
+          </div>
           <p class="full soft" data-no-worker style="font-size:.9rem">Have photos of your home? Text them to <a class="text-link" href="sms:+18484037111">(848) 403-7111</a> after you send this.</p>
           <div class="hp" aria-hidden="true"><label for="f-hp">Leave empty</label><input id="f-hp" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
         </div>
         <div class="form-foot"><p id="form-note">We only use your details to reply to your request.</p><button class="btn" type="submit">Request Your Free Quote</button></div>
         <div class="form-status" role="status" aria-live="polite"></div>
+        <div class="confirm" id="quote-confirm" hidden tabindex="-1">
+          <div class="confirm__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <h2 class="confirm__title">You’re all set!</h2>
+          <p class="confirm__text"></p>
+          <ul class="confirm__steps">
+            <li><strong>1.</strong> We review your details and photos.</li>
+            <li><strong>2.</strong> We call or text you within 1 business day to set up your free consultation.</li>
+            <li><strong>3.</strong> You get a clear, written quote. No pressure.</li>
+          </ul>
+          <p class="soft confirm__help">Questions? Call or text <a class="text-link" href="tel:+18484037111">(848) 403-7111</a>.</p>
+          <button type="button" class="btn btn--line confirm__again">Send another request</button>
+        </div>
         <div class="preview" id="ai-preview" hidden aria-live="polite">
           <div class="preview__loading"><span class="spinner" aria-hidden="true"></span><div><strong>Creating your lighting preview…</strong><p class="soft">This usually takes 30–60 seconds. Keep this page open.</p></div></div>
           <figure class="preview__result" hidden><img alt="AI-generated preview of your home with lighting along the roofline"><figcaption><strong>Your AI preview.</strong> This is a computer-generated illustration to help you picture the look. It isn’t a photo of a finished install, and your actual design is planned with you during the consultation.</figcaption></figure>

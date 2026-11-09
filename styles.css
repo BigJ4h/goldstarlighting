@@ -370,3 +370,18 @@ p { margin: 0; }
 .preview__result img { width: 100%; border-radius: 12px; box-shadow: 0 18px 40px -20px rgba(0,0,0,.4); }
 .preview__result figcaption { font-size: .88rem; color: var(--soft); }
 .preview__result figcaption strong { color: var(--ink); }
+
+/* AI preview callout + confirmation */
+.ai-box { border: 1.5px dashed var(--amber); background: #fffaf0; border-radius: 14px; padding: 18px; display: grid; gap: 12px; }
+.ai-box__title { font-family: "Sora", sans-serif; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ai-box__badge { background: var(--amber); color: #1b1b1b; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+.ai-box__text { font-size: .92rem; margin: 0; }
+.confirm { text-align: left; display: grid; gap: 14px; outline: none; }
+.confirm__icon { width: 52px; height: 52px; border-radius: 50%; background: #e5f3e8; color: #1d5a2c; display: grid; place-items: center; }
+.confirm__title { font-family: "Sora", sans-serif; font-size: 1.6rem; line-height: 1.15; margin: 0; }
+.confirm__text { margin: 0; }
+.confirm__steps { list-style: none; margin: 0; padding: 14px 16px; background: var(--cream, #faf8f3); border-radius: 12px; display: grid; gap: 8px; font-size: .95rem; }
+.confirm__help { margin: 0; font-size: .92rem; }
+.confirm__again { justify-self: start; }
+.preview:not([hidden]) { display: block; }
+.confirm, .preview { scroll-margin-top: 110px; }

@@ -212,6 +212,32 @@
     form.querySelectorAll("[data-worker-only]").forEach(function (el) { el.hidden = !worker; });
     form.querySelectorAll("[data-no-worker]").forEach(function (el) { el.hidden = !!worker; });
     var preview = document.getElementById("ai-preview");
+    var confirmBox = document.getElementById("quote-confirm");
+    var formParts = form.querySelectorAll(".form-grid, .form-foot");
+    var SERVICE_NAMES = { permanent: "permanent lighting", christmas: "Christmas lighting", both: "permanent and Christmas lighting" };
+    function esc(t) { var d = document.createElement("div"); d.textContent = t || ""; return d.innerHTML; }
+    function showConfirm(info) {
+      if (!confirmBox) return false;
+      var first = (info.name || "").trim().split(/\s+/)[0];
+      confirmBox.querySelector(".confirm__title").textContent = first ? "You’re all set, " + first + "!" : "You’re all set!";
+      confirmBox.querySelector(".confirm__text").innerHTML =
+        "We received your request for <strong>" + esc(SERVICE_NAMES[info.service] || "lighting") + "</strong>" +
+        (info.location ? " at <strong>" + esc(info.location) + "</strong>" : "") + ". " +
+        (info.phone ? "We’ll reach you at <strong>" + esc(info.phone) + "</strong>" : "We’ll be in touch") +
+        (info.email ? " and sent a confirmation to <strong>" + esc(info.email) + "</strong>." : ".") +
+        (info.preview ? " Your AI lighting preview is being created below." : "");
+      formParts.forEach(function (el) { el.hidden = true; });
+      status.className = "form-status"; status.innerHTML = "";
+      confirmBox.hidden = false;
+      confirmBox.focus({ preventScroll: true });
+      if (!reduceMotion) confirmBox.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    }
+    if (confirmBox) confirmBox.querySelector(".confirm__again").addEventListener("click", function () {
+      confirmBox.hidden = true; if (preview) preview.hidden = true;
+      formParts.forEach(function (el) { el.hidden = false; });
+      var first = form.querySelector("input, select, textarea"); if (first) first.focus();
+    });
 
     // Shrink photos in the browser before upload (faster on phones, smaller for the AI).
     function shrink(file, max) {
@@ -236,6 +262,7 @@
       payload._template = "table";
       payload._captcha = "false";
       payload._honey = "";
+      if (payload.email) payload._autoresponse = "Thanks for reaching out to Golden Star Property Care! We received your lighting quote request and will call or text you within 1 business day to set up your free consultation. Questions? Call or text (848) 403-7111.";
       return fetch(cfg.formEndpoint, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "application/json", Accept: "application/json" } })
         .then(function (res) { return res.json().catch(function () { return {}; }).then(function (d) {
           var good = res.ok && (d.success === true || d.success === "true" || d.ok === true || (d.success === undefined && d.ok === undefined));
@@ -265,7 +292,7 @@
         .then(function (d) {
           result.querySelector("img").src = "data:image/png;base64," + d.image;
           load.hidden = true; result.hidden = false;
-          if (!reduceMotion) preview.scrollIntoView({ behavior: "smooth", block: "center" });
+          if (!reduceMotion) preview.scrollIntoView({ behavior: "smooth", block: "start" });
         })
         .catch(function () { load.hidden = true; err.hidden = false; });
     }
@@ -303,9 +330,10 @@
         })
         .then(function (r) {
           if (!r.delivered) throw new Error("not delivered");
+          var info = { name: name, service: service, location: fd.get("location"), phone: fd.get("phone"), email: fd.get("email"), preview: wantsPreview };
           form.reset();
           form.querySelectorAll("[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
-          showStatus("ok", "<strong>Thank you! Your request was received.</strong> We'll be in touch to schedule your consultation." + (wantsPreview ? " Your lighting preview is being created below." : ""));
+          if (!showConfirm(info)) showStatus("ok", "<strong>Thank you! Your request was received.</strong> We'll be in touch to schedule your consultation." + (wantsPreview ? " Your lighting preview is being created below." : ""));
           if (wantsPreview) runPreview(r.photos[0], service, name);
         })
         .catch(function () {
